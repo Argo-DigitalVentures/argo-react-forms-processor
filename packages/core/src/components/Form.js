@@ -205,6 +205,13 @@ export default class Form extends Component<
     this.setState(nextState, () => onFocus && onFocus(id));
   }
 
+  onFieldClick(id: string) {
+    const { onClick } = this.props;
+    if(onClick) {
+      onClick(id);
+    }
+  }
+
   // Register field is provided in the context to allow children to register with this form...
   registerField(field: FieldDef) {
     let { fields = [], value = {} } = this.state;
@@ -253,6 +260,7 @@ export default class Form extends Component<
     } = this.props;
     const onFieldChange = this.onFieldChange.bind(this); // TODO: Is this creating a new function each time? Does this result in too many listeners?
     const onFieldFocus = this.onFieldFocus.bind(this); // TODO: See above comment
+    const onFieldClick = this.onFieldClick.bind(this); // TODO: See above comment
 
     const context: FormContextData = {
       fields,
@@ -264,6 +272,7 @@ export default class Form extends Component<
       options: {},
       onFieldChange,
       onFieldFocus,
+      onFieldClick,
       parentContext,
       showValidationBeforeTouched,
       validationHandler,

@@ -30,6 +30,8 @@ export type OnFieldFocus = (id: string) => void;
 
 export type OnFieldChange = (id: string, value: any) => void;
 
+export type OnFieldClick = (id: string) => void;
+
 export type LengthIsGreaterThan = ({
   value: Value,
   length: number,
@@ -222,7 +224,7 @@ export type Field = FieldDef & {
   registerField?: FieldDef => void
 };
 
-export type FieldRenderer = (FieldDef, OnFieldChange, OnFieldFocus) => any;
+export type FieldRenderer = (FieldDef, OnFieldChange, OnFieldFocus, OnFieldClick) => any;
 
 export type FormValue = {
   [string]: Value
@@ -320,6 +322,7 @@ export type FormContextData = {
   renderer: FieldRenderer,
   onFieldChange: OnFieldChange,
   onFieldFocus: OnFieldFocus,
+  onFieldClick: OnFieldClick,
   parentContext?: FormContextData,
   showValidationBeforeTouched: boolean,
   conditionalUpdate: boolean,

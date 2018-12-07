@@ -5,6 +5,7 @@ import type {
   FieldDef,
   OnFieldChange,
   OnFieldFocus,
+  OnFieldClick,
   Option
 } from "./types";
 
@@ -29,6 +30,7 @@ const renderSelect = (
   field: FieldDef,
   onChange: OnFieldChange,
   onFieldFocus: OnFieldFocus,
+  onFieldClick: OnFieldClick,
   multiple: boolean
 ) => {
   const {
@@ -77,6 +79,7 @@ const renderSelect = (
         disabled={disabled}
         required={required}
         onFocus={() => onFieldFocus(id)}
+        onClick={() => onFieldClick(id)}
         onChange={evt => {
           if (multiple) {
             const options = evt.target.options;
@@ -95,7 +98,7 @@ const renderSelect = (
   );
 };
 
-const renderer: FieldRenderer = (field, onChange, onFieldFocus) => {
+const renderer: FieldRenderer = (field, onChange, onFieldFocus, onFieldClick) => {
   const {
     disabled = false,
     errorMessages,
@@ -126,14 +129,15 @@ const renderer: FieldRenderer = (field, onChange, onFieldFocus) => {
             checked={value}
             onChange={evt => onChange(id, evt.target.checked)}
             onFocus={() => onFieldFocus(id)}
+            onClick={() => onFieldClick(id)}
           />
         </div>
       );
     case "select":
-      return renderSelect(field, onChange, onFieldFocus, false);
+      return renderSelect(field, onChange, onFieldFocus, onFieldClick, false);
 
     case "multiselect":
-      return renderSelect(field, onChange, onFieldFocus, true);
+      return renderSelect(field, onChange, onFieldFocus, onFieldClick, true);
 
     case "radiogroup":
       items = options.reduce((itemsSoFar, option) => {
@@ -151,6 +155,7 @@ const renderer: FieldRenderer = (field, onChange, onFieldFocus) => {
                     checked={item === value}
                     onChange={evt => onChange(id, evt.target.value)}
                     onFocus={() => onFieldFocus(id)}
+                    onClick={() => onFieldClick(id)}
                   />
                   <label htmlFor={inputId}>{item}</label>
                 </div>
@@ -166,6 +171,7 @@ const renderer: FieldRenderer = (field, onChange, onFieldFocus) => {
                     checked={item.value === value}
                     onChange={evt => onChange(id, evt.target.value)}
                     onFocus={() => onFieldFocus(id)}
+                    onClick={() => onFieldClick(id)}
                   />
                   <label htmlFor={inputId}>{item.label || item.value}</label>
                 </div>
