@@ -26,8 +26,6 @@ export type Rule = {
   isNot?: Value[]
 };
 
-export type OnFieldFocus = (id: string) => void;
-
 export type OnFieldChange = (id: string, value: any) => void;
 
 export type LengthIsGreaterThan = ({
@@ -207,12 +205,14 @@ export type FieldDef = {
   addedSuffix?: string,
   removedSuffix?: string,
   options?: Options,
+  refreshOptionsOnChangesTo?: string[],
   pendingOptions?: Promise<Options>,
   misc?: {
     [string]: any
   },
   trimValue?: boolean,
-  touched?: boolean // TODO: Should this actually be on field?
+  touched?: boolean, // TODO: Should this actually be on field?
+  autofocus?: boolean
 };
 
 export type Field = FieldDef & {
@@ -230,6 +230,8 @@ export type FormValue = {
 
 export type OnFormChange = (FormValue, boolean) => void;
 
+export type OnFieldFocus = (fieldId: string) => void;
+
 export type EvaluateRule = (rule?: Rule, targetValue: Value) => boolean;
 
 export type FieldsById = {
@@ -243,11 +245,18 @@ export type EvaluateAllRules = (
 ) => boolean;
 
 export type ProcessFields = (FieldDef[], boolean, boolean) => FieldDef[];
-export type ProcessOptions = (
-  FieldDef[],
-  OptionsHandler,
-  ?FormContextData
-) => FieldDef[];
+
+export type ShouldOptionsBeRefreshed = ({
+  lastFieldUpdated?: string,
+  field: FieldDef
+}) => boolean;
+
+export type ProcessOptions = ({
+  fields: FieldDef[],
+  lastFieldUpdated?: string,
+  optionsHandler: OptionsHandler,
+  parentContext: ?FormContextData
+}) => FieldDef[];
 
 export type ValidationResult = {
   isValid: boolean,
@@ -293,15 +302,16 @@ export type DetermineChangedValues = FieldDef => Array<{
 
 export type GetTouchedStateForField = (boolean, boolean) => boolean;
 
-export type GetNextStateFromProps = (
-  FieldDef[],
-  boolean,
-  boolean,
-  boolean,
-  ?OptionsHandler,
-  ?ValidationHandler,
-  ?FormContextData
-) => $Shape<FormComponentState>;
+export type GetNextStateFromProps = ({
+  fields: FieldDef[],
+  lastFieldUpdated?: string,
+  showValidationBeforeTouched: boolean,
+  formIsDisabled: boolean,
+  resetTouchedState: boolean,
+  optionsHandler: ?OptionsHandler,
+  validationHandler: ?ValidationHandler,
+  parentContext: ?FormContextData
+}) => $Shape<FormComponentState>;
 
 export type CalculateFormValue = (FieldDef[]) => FormValue;
 
