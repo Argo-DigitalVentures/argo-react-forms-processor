@@ -127,15 +127,15 @@ export default class Form extends Component<
       // changes...
       const resetTouchedState = defaultValueChange;
 
-      const nextState = getNextStateFromFields(
+      const nextState = getNextStateFromFields({
         fields,
         showValidationBeforeTouched,
-        disabled,
+        formIsDisabled: disabled,
         resetTouchedState,
         optionsHandler,
         validationHandler,
         parentContext
-      );
+      });
       return {
         ...nextState,
         defaultFields: defaultFieldsFromProps,
@@ -156,16 +156,18 @@ export default class Form extends Component<
       disabled = false
     } = this.props;
     let { fields } = this.state;
+    fields = updateFieldTouchedState(id, true, fields);
     fields = updateFieldValue(id, value, fields);
-    const nextState = getNextStateFromFields(
+    const nextState = getNextStateFromFields({
       fields,
+      lastFieldUpdated: id,
       showValidationBeforeTouched,
-      disabled,
-      false,
+      formIsDisabled: disabled,
+      resetTouchedState: false,
       optionsHandler,
       validationHandler,
       parentContext
-    );
+    });
 
     this.setState(
       (state, props) => {
@@ -182,27 +184,37 @@ export default class Form extends Component<
   }
 
   onFieldFocus(id: string) {
+    // At one stage the plan was to only show validation error messages once a field
+    // had been touched, but in reality we only want to show validation messages when
+    // a field has been changed OR has been blurred.
+    // So now we just want to make sure that callbacks on the form for handling when
+    // a field is focused are called.
+    const { onFieldFocus: onFieldFocusProp } = this.props;
+    onFieldFocusProp && onFieldFocusProp(id);
+  }
+
+  onFieldBlur(id: string) {
     const {
       optionsHandler,
       validationHandler,
-      onFocus,
+      onFieldBlur: onFieldBlurProp,
       parentContext,
       showValidationBeforeTouched = false,
       disabled = false
     } = this.props;
     let { fields } = this.state;
     fields = updateFieldTouchedState(id, true, fields);
-    const nextState = getNextStateFromFields(
+    const nextState = getNextStateFromFields({
       fields,
       showValidationBeforeTouched,
-      disabled,
-      false,
+      formIsDisabled: disabled,
+      resetTouchedState: false,
       optionsHandler,
       validationHandler,
       parentContext
-    );
+    });
 
-    this.setState(nextState, () => onFocus && onFocus(id));
+    this.setState(nextState, () => onFieldBlurProp && onFieldBlurProp(id));
   }
 
   // Register field is provided in the context to allow children to register with this form...
@@ -219,20 +231,21 @@ export default class Form extends Component<
     } else {
       fields = registerField(field, fields, value);
       this.setState((state, props) => {
+        const { optionsHandler, validationHandler, parentContext } = props;
         const filteredFields = state.fields.filter(
           existingField => existingField.id !== field.id
         );
         // let updatedFields = fields.concat(filteredFields);
         let updatedFields = filteredFields.concat(field);
-        const nextState = getNextStateFromFields(
-          updatedFields,
+        const nextState = getNextStateFromFields({
+          fields: updatedFields,
           showValidationBeforeTouched,
-          disabled,
-          false,
-          props.optionsHandler,
-          props.validationHandler,
-          props.parentContext
-        );
+          formIsDisabled: disabled,
+          resetTouchedState: false,
+          optionsHandler,
+          validationHandler,
+          parentContext
+        });
         return {
           ...nextState
         };
@@ -253,6 +266,7 @@ export default class Form extends Component<
     } = this.props;
     const onFieldChange = this.onFieldChange.bind(this); // TODO: Is this creating a new function each time? Does this result in too many listeners?
     const onFieldFocus = this.onFieldFocus.bind(this); // TODO: See above comment
+    const onFieldBlur = this.onFieldBlur.bind(this);
 
     const context: FormContextData = {
       fields,
@@ -262,6 +276,7 @@ export default class Form extends Component<
       renderer,
       optionsHandler,
       options: {},
+      onFieldBlur,
       onFieldChange,
       onFieldFocus,
       parentContext,

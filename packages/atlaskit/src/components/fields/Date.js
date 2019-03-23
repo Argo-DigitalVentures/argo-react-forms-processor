@@ -1,7 +1,7 @@
 // @flow
 import React from "react";
 import { DatePicker } from "@atlaskit/datetime-picker";
-import { Field as AkField } from "@atlaskit/form";
+import { Field as AkField, ErrorMessage } from "@atlaskit/form";
 import { FieldWrapper } from "react-forms-processor";
 import type { Field, FieldDef } from "react-forms-processor";
 
@@ -16,13 +16,16 @@ class AtlaskitDate extends React.Component<Field> {
       name,
       onFieldChange,
       onFieldFocus,
+      onFieldBlur,
       placeholder,
       required,
       value,
-      label
+      label,
+      autofocus
     } = this.props;
     return (
       <AkField
+        name={name}
         label={label}
         helperText={description}
         isRequired={required}
@@ -30,15 +33,24 @@ class AtlaskitDate extends React.Component<Field> {
         invalidMessage={errorMessages}
         validateOnBlur={false}
       >
-        <DatePicker
-          autoComplete="off"
-          name={name}
-          placeholder={placeholder}
-          onChange={value => onFieldChange(id, value)}
-          value={value}
-          isDisabled={disabled}
-          onFocus={() => onFieldFocus(id)}
-        />
+        {({ fieldProps }) => (
+          <React.Fragment>
+            <DatePicker
+              {...fieldProps}
+              autoComplete="off"
+              name={name}
+              placeholder={placeholder}
+              onChange={value => onFieldChange(id, value)}
+              value={value}
+              isInvalid={!isValid}
+              isDisabled={disabled}
+              onFocus={() => onFieldFocus(id)}
+              onBlur={() => onFieldBlur(id)}
+              autoFocus={autofocus}
+            />
+            {!isValid && <ErrorMessage>{errorMessages}</ErrorMessage>}
+          </React.Fragment>
+        )}
       </AkField>
     );
   }
@@ -46,7 +58,6 @@ class AtlaskitDate extends React.Component<Field> {
 
 export default (props: FieldDef) => (
   <FieldWrapper {...props}>
-    {/* $FlowFixMe */}
     <AtlaskitDate />
   </FieldWrapper>
 );

@@ -1,15 +1,20 @@
 // @flow
 import React from "react";
-import akRenderer from "../../atlaskit/src/renderer";
 import FieldDefinitionField from "./FieldDefinitionField";
 import type {
   FieldRenderer,
   FieldDef,
   OnFieldChange
 } from "react-forms-processor";
+import { renderer as akRenderer } from "react-forms-processor-atlaskit";
 import RepeatingFormField from "./Repeats";
 
-const renderer: FieldRenderer = (field, onChange, onFieldFocus) => {
+const renderer: FieldRenderer = (
+  field,
+  onChange,
+  onFieldFocus,
+  onFieldBlur
+) => {
   const { defaultValue = [], id, label, type, misc = {} } = field;
   switch (type) {
     case "field":
@@ -36,7 +41,7 @@ const renderer: FieldRenderer = (field, onChange, onFieldFocus) => {
       );
 
     default:
-      return akRenderer(field, onChange, onFieldFocus);
+      return akRenderer(field, onChange, onFieldFocus, onFieldBlur);
   }
 };
 

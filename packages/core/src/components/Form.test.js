@@ -146,8 +146,13 @@ describe("validation warnings", () => {
       expect(form.find("span.errors").length).toBe(0);
     });
 
-    test("field should be touched after focus", () => {
+    test("field should NOT be touched after focus", () => {
       form.find("input").prop("onFocus")();
+      expect(form.state().fields[0].touched).toBe(false);
+    });
+
+    test("field should be touched after blur", () => {
+      form.find("input").prop("onBlur")();
       expect(form.state().fields[0].touched).toBe(true);
     });
 
@@ -203,8 +208,14 @@ describe("changing form value prop", () => {
     expect(form.state().fields[0].touched).toBe(false);
   });
 
-  test("field should be touched after focus", () => {
+  test("field should NOT be touched after focus", () => {
     form.find("input").prop("onFocus")();
+    form.update();
+    expect(form.state().fields[0].touched).toBe(false);
+  });
+
+  test("field should be touched after blur", () => {
+    form.find("input").prop("onBlur")();
     form.update();
     expect(form.state().fields[0].touched).toBe(true);
   });
@@ -213,5 +224,59 @@ describe("changing form value prop", () => {
     form.setProps({ value: formValue2 });
     form.update();
     expect(form.state().fields[0].touched).toBe(false);
+  });
+});
+
+describe("Form and FormFragment behave the same with defaultFields and value", () => {
+  // This example is taken from issue: https://github.com/draperd/react-forms-processor/issues/35
+  const fruit: FieldDef[] = [
+    {
+      id: "PICKMORETHANONE",
+      name: "fruit",
+      label: "Pick some fruit",
+      placeholder: "Available fruits...",
+      type: "multiselect",
+      defaultValue: "apple,banana",
+      valueDelimiter: ",",
+      options: [
+        {
+          items: ["apple", "banana", "kiwi", "melon", "grapefruit", "plum"]
+        }
+      ]
+    }
+  ];
+
+  test("Form field has correct value from defaultFields", () => {
+    const form = mount(<Form defaultFields={fruit} />);
+    const fieldValue = form.find("select").prop("value");
+    expect(fieldValue).toEqual(["apple", "banana"]);
+  });
+
+  test("FormFragment field has correct value from defaultFields", () => {
+    const form = mount(
+      <Form>
+        <FormFragment defaultFields={fruit} />
+      </Form>
+    );
+    const fieldValue = form.find("select").prop("value");
+    expect(fieldValue).toEqual(["apple", "banana"]);
+  });
+
+  test("Form field has correct value from value", () => {
+    const form = mount(
+      <Form defaultFields={fruit} value={{ fruit: "melon" }} />
+    );
+    const fieldValue = form.find("select").prop("value");
+    expect(fieldValue).toEqual(["melon"]);
+  });
+
+  test("FormFragment field has correct value from value", () => {
+    const form = mount(
+      <Form value={{ fruit: "melon" }}>
+        <FormFragment defaultFields={fruit} />
+      </Form>
+    );
+    const fieldValue = form.find("select").prop("value");
+    expect(fieldValue).toEqual(["melon"]);
   });
 });

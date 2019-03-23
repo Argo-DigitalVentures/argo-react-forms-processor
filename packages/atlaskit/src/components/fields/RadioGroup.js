@@ -4,7 +4,7 @@ import RadioGroup from "@atlaskit/field-radio-group";
 import { FieldWrapper } from "react-forms-processor";
 import styled from "styled-components";
 import type { Field, FieldDef } from "react-forms-processor";
-import { Field as AkField } from "@atlaskit/form";
+import { Field as AkField, ErrorMessage } from "@atlaskit/form";
 
 // NOTE: Temporary hack to workaround the problem of duplicate label appearing - this can stop being used as soon as Atlaskit forms support Radio Groups properly
 const Layout = styled.div`
@@ -28,6 +28,7 @@ class AtlaskitRadioGroup extends React.Component<Field> {
       value,
       label,
       onFieldFocus,
+      onFieldBlur,
       onFieldChange
     } = this.props;
     const stringValue: string | void = value ? value.toString() : undefined;
@@ -60,6 +61,7 @@ class AtlaskitRadioGroup extends React.Component<Field> {
 
     return (
       <AkField
+        name={name}
         label={label}
         helperText={description}
         isRequired={required}
@@ -67,16 +69,26 @@ class AtlaskitRadioGroup extends React.Component<Field> {
         invalidMessage={errorMessages}
         validateOnBlur={false}
       >
-        <Layout>
-          <RadioGroup
-            name={name}
-            placeholder={placeholder}
-            value={stringValue}
-            items={items}
-            onRadioChange={(evt: any) => onFieldChange(id, evt.target.value)}
-            onFocus={() => onFieldFocus(id)}
-          />
-        </Layout>
+        {({ fieldProps }) => (
+          <React.Fragment>
+            <Layout>
+              <RadioGroup
+                {...fieldProps}
+                name={name}
+                placeholder={placeholder}
+                value={stringValue}
+                items={items}
+                onRadioChange={(evt: any) =>
+                  onFieldChange(id, evt.target.value)
+                }
+                onFocus={() => onFieldFocus(id)}
+                isRequired={required}
+                isInvalid={!isValid}
+              />
+            </Layout>
+            {!isValid && <ErrorMessage>{errorMessages}</ErrorMessage>}
+          </React.Fragment>
+        )}
       </AkField>
     );
   }
@@ -84,7 +96,6 @@ class AtlaskitRadioGroup extends React.Component<Field> {
 
 export default (props: FieldDef) => (
   <FieldWrapper {...props}>
-    {/* $FlowFixMe */}
     <AtlaskitRadioGroup />
   </FieldWrapper>
 );

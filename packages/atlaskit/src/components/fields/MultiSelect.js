@@ -3,7 +3,7 @@ import React from "react";
 import Select from "@atlaskit/select";
 import { FieldWrapper } from "react-forms-processor";
 import type { Field, FieldDef } from "react-forms-processor";
-import { Field as AkField } from "@atlaskit/form";
+import { Field as AkField, ErrorMessage } from "@atlaskit/form";
 
 class AtlaskitSelect extends React.Component<Field> {
   render() {
@@ -21,9 +21,12 @@ class AtlaskitSelect extends React.Component<Field> {
       label,
       onFieldChange,
       onFieldFocus,
+      onFieldBlur,
       touched,
       validWhen,
-      requiredWhen
+      requiredWhen,
+      autofocus,
+      shouldFitContainer
     } = this.props;
     const defaultValue = [];
     const stringValue: string | void = value ? value.toString() : undefined;
@@ -68,29 +71,42 @@ class AtlaskitSelect extends React.Component<Field> {
       (validWhen && Object.keys(validWhen).length) ||
       (requiredWhen && requiredWhen.length) ||
       required;
+    const isInvalid = touched && needsValidation && !isValid;
 
     return (
       <AkField
+        name={name}
         label={label}
         helperText={description}
         isRequired={required}
-        isInvalid={touched && needsValidation ? !isValid : undefined}
+        isInvalid={isInvalid}
         invalidMessage={errorMessages}
-        validateOnBlur={false}
       >
-        <Select
-          isMulti={true}
-          isSearchable={false}
-          name={name}
-          defaultValue={defaultValue}
-          placeholder={placeholder}
-          isDisabled={disabled}
-          options={items}
-          onChange={value => {
-            onFieldChange(id, value.map(item => item.value));
-          }}
-          onFocus={() => onFieldFocus(id)}
-        />
+        {({ fieldProps }) => (
+          <React.Fragment>
+            <Select
+              {...fieldProps}
+              isMulti={true}
+              isSearchable={false}
+              name={name}
+              defaultValue={defaultValue}
+              placeholder={placeholder}
+              isDisabled={disabled}
+              options={items}
+              onChange={value => {
+                onFieldChange(id, value.map(item => item.value));
+              }}
+              onFocus={() => onFieldFocus(id)}
+              onBlur={() => {
+                onFieldFocus(id);
+              }}
+              autoFocus={autofocus}
+              isInvalid={isInvalid}
+              shouldFitContainer={shouldFitContainer}
+            />
+            {isInvalid && <ErrorMessage>{errorMessages}</ErrorMessage>}
+          </React.Fragment>
+        )}
       </AkField>
     );
   }
@@ -98,7 +114,6 @@ class AtlaskitSelect extends React.Component<Field> {
 
 export default (props: FieldDef) => (
   <FieldWrapper {...props}>
-    {/* $FlowFixMe */}
     <AtlaskitSelect />
   </FieldWrapper>
 );

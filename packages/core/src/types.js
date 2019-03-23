@@ -26,8 +26,6 @@ export type Rule = {
   isNot?: Value[]
 };
 
-export type OnFieldFocus = (id: string) => void;
-
 export type OnFieldChange = (id: string, value: any) => void;
 
 export type LengthIsGreaterThan = ({
@@ -194,8 +192,11 @@ export type FieldDef = {
   defaultDisabled?: boolean,
   disabled?: boolean,
   disabledWhen?: Rule[],
+  disabledWhenAll?: Rule[],
   visibleWhen?: Rule[],
+  visibleWhenAll?: Rule[],
   requiredWhen?: Rule[],
+  requiredWhenAll?: Rule[],
   validWhen?: ValidationRules,
   isValid?: boolean,
   isDiscretelyInvalid?: boolean,
@@ -207,22 +208,31 @@ export type FieldDef = {
   addedSuffix?: string,
   removedSuffix?: string,
   options?: Options,
+  refreshOptionsOnChangesTo?: string[],
   pendingOptions?: Promise<Options>,
   misc?: {
     [string]: any
   },
   trimValue?: boolean,
-  touched?: boolean // TODO: Should this actually be on field?
+  touched?: boolean, // TODO: Should this actually be on field?
+  autofocus?: boolean,
+  shouldFitContainer?: boolean,
 };
 
 export type Field = FieldDef & {
   fields: FieldDef[],
   onFieldChange: OnFieldChange,
   onFieldFocus: OnFieldFocus,
+  onFieldBlur: OnFieldBlur,
   registerField?: FieldDef => void
 };
 
-export type FieldRenderer = (FieldDef, OnFieldChange, OnFieldFocus) => any;
+export type FieldRenderer = (
+  FieldDef,
+  OnFieldChange,
+  OnFieldFocus,
+  OnFieldBlur
+) => any;
 
 export type FormValue = {
   [string]: Value
@@ -230,24 +240,47 @@ export type FormValue = {
 
 export type OnFormChange = (FormValue, boolean) => void;
 
+export type OnFieldFocus = (fieldId: string) => void;
+export type OnFieldBlur = (fieldId: string) => void;
+
 export type EvaluateRule = (rule?: Rule, targetValue: Value) => boolean;
 
 export type FieldsById = {
   [string]: FieldDef
 };
 
-export type EvaluateAllRules = (
+export type EvaluateAnyAndAllRules = ({
+  anyRules: Rule[],
+  allRules: Rule[],
+  fieldsById: FieldsById,
+  defaultResult: boolean
+}) => boolean;
+
+export type EvaluateAllRules = ({
   rules: Rule[],
   fieldsById: FieldsById,
   defaultResult: boolean
-) => boolean;
+}) => boolean;
+
+export type EvaluateSomeRules = ({
+  rules: Rule[],
+  fieldsById: FieldsById,
+  defaultResult: boolean
+}) => boolean;
 
 export type ProcessFields = (FieldDef[], boolean, boolean) => FieldDef[];
-export type ProcessOptions = (
-  FieldDef[],
-  OptionsHandler,
-  ?FormContextData
-) => FieldDef[];
+
+export type ShouldOptionsBeRefreshed = ({
+  lastFieldUpdated?: string,
+  field: FieldDef
+}) => boolean;
+
+export type ProcessOptions = ({
+  fields: FieldDef[],
+  lastFieldUpdated?: string,
+  optionsHandler: OptionsHandler,
+  parentContext: ?FormContextData
+}) => FieldDef[];
 
 export type ValidationResult = {
   isValid: boolean,
@@ -262,12 +295,12 @@ export type ValidateField = (
   ?FormContextData
 ) => FieldDef;
 
-export type ValidateAllFields = (
-  FieldDef[],
-  boolean,
-  ?ValidationHandler,
-  ?FormContextData
-) => FieldDef[];
+export type ValidateAllFields = ({
+  fields: FieldDef[],
+  showValidationBeforeTouched: boolean,
+  validationHandler: ?ValidationHandler,
+  parentContext: ?FormContextData
+}) => FieldDef[];
 
 export type CreateFieldDef = ($Shape<FieldDef>) => FieldDef;
 
@@ -293,15 +326,16 @@ export type DetermineChangedValues = FieldDef => Array<{
 
 export type GetTouchedStateForField = (boolean, boolean) => boolean;
 
-export type GetNextStateFromProps = (
-  FieldDef[],
-  boolean,
-  boolean,
-  boolean,
-  ?OptionsHandler,
-  ?ValidationHandler,
-  ?FormContextData
-) => $Shape<FormComponentState>;
+export type GetNextStateFromProps = ({
+  fields: FieldDef[],
+  lastFieldUpdated?: string,
+  showValidationBeforeTouched: boolean,
+  formIsDisabled: boolean,
+  resetTouchedState: boolean,
+  optionsHandler: ?OptionsHandler,
+  validationHandler: ?ValidationHandler,
+  parentContext: ?FormContextData
+}) => $Shape<FormComponentState>;
 
 export type CalculateFormValue = (FieldDef[]) => FormValue;
 
@@ -320,6 +354,7 @@ export type FormContextData = {
   renderer: FieldRenderer,
   onFieldChange: OnFieldChange,
   onFieldFocus: OnFieldFocus,
+  onFieldBlur: OnFieldBlur,
   parentContext?: FormContextData,
   showValidationBeforeTouched: boolean,
   conditionalUpdate: boolean,

@@ -5,6 +5,8 @@ import type {
   FormContextData,
   FormValue,
   OnFormChange,
+  OnFieldFocus,
+  OnFieldBlur,
   FieldRenderer,
   OptionsHandler,
   ValidationHandler
@@ -14,6 +16,8 @@ export type FormComponentProps = {
   defaultFields?: FieldDef[],
   value?: FormValue,
   onChange?: OnFormChange,
+  onFieldFocus?: OnFieldFocus,
+  onFieldBlur?: OnFieldBlur,
   renderer?: FieldRenderer,
   optionsHandler?: OptionsHandler,
   validationHandler?: ValidationHandler,
