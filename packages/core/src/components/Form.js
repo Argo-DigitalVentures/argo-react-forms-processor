@@ -117,6 +117,13 @@ export default class Form extends Component<
       const defaultFields = defaultFieldsFromProps || fieldsFromState;
       let fields;
       if (defaultFieldsFromProps && defaultFieldsChange) {
+        defaultFieldsFromProps.forEach( fieldFromProp => {
+          fieldsFromState.forEach( fieldFromState => {
+            if (fieldFromProp.id === fieldFromState.id) {
+              fieldFromProp.touched = fieldFromState.touched;
+            }
+          })
+        })
         fields = registerFields(defaultFieldsFromProps, value);
       } else {
         // TODO: Ideally we shouldn't need to register to update the value...
