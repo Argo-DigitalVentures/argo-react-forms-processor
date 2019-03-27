@@ -24,6 +24,7 @@ export type FormComponentProps = {
   children?: Node,
   parentContext?: FormContextData,
   showValidationBeforeTouched?: boolean,
+  shouldPersistTouched?: boolean,
   conditionalUpdate?: boolean,
   disabled?: boolean
 };
@@ -35,7 +36,8 @@ export type FormComponentState = {
   isValid: boolean,
   defaultFields: [],
   disabled: boolean,
-  showValidationBeforeTouched: boolean
+  showValidationBeforeTouched: boolean,
+  shouldPersistTouched: boolean
 };
 
 export type FormFragmentComponentProps = {

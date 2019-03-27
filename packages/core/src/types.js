@@ -357,6 +357,7 @@ export type FormContextData = {
   onFieldBlur: OnFieldBlur,
   parentContext?: FormContextData,
   showValidationBeforeTouched: boolean,
+  shouldPersistTouched: boolean,
   conditionalUpdate: boolean,
   disabled: boolean
 };
