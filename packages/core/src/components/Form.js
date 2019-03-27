@@ -48,8 +48,12 @@ const formTouchedBehaviourHasChanged = (
   nextProps: FormComponentProps,
   prevState: FormComponentState
 ) =>
-  nextProps.showValidationBeforeTouched !==
-  prevState.showValidationBeforeTouched;
+  (
+    (nextProps.showValidationBeforeTouched !==
+    prevState.showValidationBeforeTouched) ||
+    (nextProps.shouldPersistTouched !==
+    prevState.shouldPersistTouched)
+  );
 
 export default class Form extends Component<
   FormComponentProps,
@@ -64,7 +68,8 @@ export default class Form extends Component<
       isValid: false,
       defaultFields: [],
       disabled: props.disabled || false,
-      showValidationBeforeTouched: !!props.showValidationBeforeTouched
+      showValidationBeforeTouched: !!props.showValidationBeforeTouched,
+      shouldPersistTouched: !!props.shouldPersistTouched
     };
   }
 
@@ -117,6 +122,20 @@ export default class Form extends Component<
       const defaultFields = defaultFieldsFromProps || fieldsFromState;
       let fields;
       if (defaultFieldsFromProps && defaultFieldsChange) {
+        // This solves the specific case of dynamic validation error messages.
+        // When the message changes, the touched state goes to false by default,
+        // because defaultFields has changed. When we're changing a validation message,
+        // that behaviour is undesirable, because the field needs to be touched so the
+        // error message is displayed.
+        if (prevState.shouldPersistTouched) {
+          defaultFieldsFromProps.forEach( fieldFromProp => {
+            fieldsFromState.forEach( fieldFromState => {
+              if (fieldFromProp.id === fieldFromState.id) {
+                fieldFromProp.touched = fieldFromState.touched;
+              }
+            })
+          })
+        }
         fields = registerFields(defaultFieldsFromProps, value);
       } else {
         // TODO: Ideally we shouldn't need to register to update the value...
@@ -156,6 +175,7 @@ export default class Form extends Component<
       disabled = false
     } = this.props;
     let { fields } = this.state;
+    fields = updateFieldTouchedState(id, true, fields);
     fields = updateFieldValue(id, value, fields);
     const nextState = getNextStateFromFields({
       fields,
@@ -260,6 +280,7 @@ export default class Form extends Component<
       validationHandler,
       parentContext,
       showValidationBeforeTouched = false,
+      shouldPersistTouched = false,
       conditionalUpdate = false,
       disabled = false
     } = this.props;
@@ -280,6 +301,7 @@ export default class Form extends Component<
       onFieldFocus,
       parentContext,
       showValidationBeforeTouched,
+      shouldPersistTouched,
       validationHandler,
       conditionalUpdate,
       disabled

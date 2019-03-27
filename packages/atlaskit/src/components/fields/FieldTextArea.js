@@ -3,7 +3,7 @@ import React from "react";
 import FieldTextArea from "@atlaskit/field-text-area";
 import { FieldWrapper } from "react-forms-processor";
 import type { Field, FieldDef } from "react-forms-processor";
-import { Field as AkField } from "@atlaskit/form";
+import { Field as AkField, ErrorMessage } from "@atlaskit/form";
 
 class AtlaskitFieldTextArea extends React.Component<Field> {
   render() {
@@ -21,10 +21,12 @@ class AtlaskitFieldTextArea extends React.Component<Field> {
       required,
       value,
       label,
-      autofocus
+      autofocus,
+      shouldFitContainer
     } = this.props;
     return (
       <AkField
+        name={name}
         label={label}
         helperText={description}
         isRequired={required}
@@ -32,6 +34,7 @@ class AtlaskitFieldTextArea extends React.Component<Field> {
         invalidMessage={errorMessages}
         validateOnBlur={false}
       >
+<<<<<<< HEAD
         <FieldTextArea
           name={name}
           placeholder={placeholder}
@@ -42,6 +45,27 @@ class AtlaskitFieldTextArea extends React.Component<Field> {
           onBlur={() => onFieldBlur(id)}
           autoFocus={autofocus}
         />
+=======
+        {({ fieldProps }) => (
+          <React.Fragment>
+            <FieldTextArea
+              {...fieldProps}
+              placeholder={placeholder}
+              disabled={disabled}
+              value={value}
+              onChange={(evt: any) => onFieldChange(id, evt.target.value)}
+              onFocus={() => onFieldFocus(id)}
+              onBlur={() => {
+                onFieldBlur(id);
+              }}
+              autoFocus={autofocus}
+              isInvalid={!isValid}
+              shouldFitContainer={shouldFitContainer}
+            />
+            {!isValid && <ErrorMessage>{errorMessages}</ErrorMessage>}
+          </React.Fragment>
+        )}
+>>>>>>> feature/update
       </AkField>
     );
   }
@@ -49,7 +73,6 @@ class AtlaskitFieldTextArea extends React.Component<Field> {
 
 export default (props: FieldDef) => (
   <FieldWrapper {...props}>
-    {/* $FlowFixMe */}
     <AtlaskitFieldTextArea />
   </FieldWrapper>
 );

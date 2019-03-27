@@ -192,8 +192,11 @@ export type FieldDef = {
   defaultDisabled?: boolean,
   disabled?: boolean,
   disabledWhen?: Rule[],
+  disabledWhenAll?: Rule[],
   visibleWhen?: Rule[],
+  visibleWhenAll?: Rule[],
   requiredWhen?: Rule[],
+  requiredWhenAll?: Rule[],
   validWhen?: ValidationRules,
   isValid?: boolean,
   isDiscretelyInvalid?: boolean,
@@ -212,7 +215,8 @@ export type FieldDef = {
   },
   trimValue?: boolean,
   touched?: boolean, // TODO: Should this actually be on field?
-  autofocus?: boolean
+  autofocus?: boolean,
+  shouldFitContainer?: boolean,
 };
 
 export type Field = FieldDef & {
@@ -245,11 +249,24 @@ export type FieldsById = {
   [string]: FieldDef
 };
 
-export type EvaluateAllRules = (
+export type EvaluateAnyAndAllRules = ({
+  anyRules: Rule[],
+  allRules: Rule[],
+  fieldsById: FieldsById,
+  defaultResult: boolean
+}) => boolean;
+
+export type EvaluateAllRules = ({
   rules: Rule[],
   fieldsById: FieldsById,
   defaultResult: boolean
-) => boolean;
+}) => boolean;
+
+export type EvaluateSomeRules = ({
+  rules: Rule[],
+  fieldsById: FieldsById,
+  defaultResult: boolean
+}) => boolean;
 
 export type ProcessFields = (FieldDef[], boolean, boolean) => FieldDef[];
 
@@ -340,6 +357,7 @@ export type FormContextData = {
   onFieldBlur: OnFieldBlur,
   parentContext?: FormContextData,
   showValidationBeforeTouched: boolean,
+  shouldPersistTouched: boolean,
   conditionalUpdate: boolean,
   disabled: boolean
 };
