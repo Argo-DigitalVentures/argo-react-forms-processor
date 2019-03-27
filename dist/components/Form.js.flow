@@ -1,6 +1,5 @@
 // @flow
 import React, { Component } from "react";
-import has from "lodash/has";
 import isEqual from "lodash/isEqual";
 import FormContext from "./FormContext";
 import FormFragment from "./FormFragment";
@@ -123,6 +122,11 @@ export default class Form extends Component<
       const defaultFields = defaultFieldsFromProps || fieldsFromState;
       let fields;
       if (defaultFieldsFromProps && defaultFieldsChange) {
+        // This solves the specific case of dynamic validation error messages.
+        // When the message changes, the touched state goes to false by default,
+        // because defaultFields has changed. When we're changing a validation message,
+        // that behaviour is undesirable, because the field needs to be touched so the
+        // error message is displayed.
         if (prevState.shouldPersistTouched) {
           defaultFieldsFromProps.forEach( fieldFromProp => {
             fieldsFromState.forEach( fieldFromState => {

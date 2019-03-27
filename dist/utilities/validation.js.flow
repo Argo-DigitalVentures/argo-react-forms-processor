@@ -356,7 +356,7 @@ export const validateField: ValidateField = (
       return Object.assign({}, field, {
         isValid: true,
         isDiscretelyInvalid: !isValid,
-        errorMessages: errorMessages.length ? errorMessages.join(", ") : ""
+        errorMessages: errorMessages.length ? errorMessages.join(". ") : ""
       });
     }
 
@@ -400,7 +400,7 @@ export const validateField: ValidateField = (
   return Object.assign({}, field, {
     isValid,
     isDiscretelyInvalid: !isValid,
-    errorMessages: errorMessages.join(", ")
+    errorMessages: errorMessages.join(". ")
   });
 };
 
