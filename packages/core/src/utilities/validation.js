@@ -350,13 +350,20 @@ export const validateField: ValidateField = (
         isValid = valueProvided;
         const { missingValueMessage = "A value must be provided" } = field;
         errorMessages.push(missingValueMessage);
+        if (touched) {
+          return Object.assign({}, field, {
+            isValid,
+            isDiscretelyInvalid: !isValid,
+            errorMessages: errorMessages.join(". ")
+          });
+        }
       }
     } else if (!valueProvided) {
       // do not run all validations if the field is empty
       return Object.assign({}, field, {
         isValid: true,
         isDiscretelyInvalid: !isValid,
-        errorMessages: errorMessages.length ? errorMessages.join(", ") : ""
+        errorMessages: errorMessages.length ? errorMessages.join(". ") : ""
       });
     }
 

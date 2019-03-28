@@ -153,8 +153,9 @@ describe("compare date fields", () => {
     firstDate.prop("onBlur")();
     secondDate.prop("onBlur")();
     form.update();
+    // if the field is empty, there's no need to show the date error
     expect(form.state().fields[0].errorMessages).toBe(
-      "A value must be provided, Must be before second date"
+      "A value must be provided"
     );
     expect(form.state().fields[1].errorMessages).toBe("");
   });
